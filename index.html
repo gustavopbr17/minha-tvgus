@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#E53935">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Minha TV</title>
+<style>
+:root{
+  --primary:#E53935;--primary-dark:#B71C1C;--bg:#101214;--card:#191C20;
+  --card-2:#20242A;--text:#F3F4F6;--muted:#9AA2AA;--border:#30353C;
+  --green:#45C982;--yellow:#F2B84B;--red:#E53935;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app{max-width:760px;margin:auto;min-height:100vh;padding-bottom:92px}
+header{padding:22px 18px 8px;display:flex;align-items:center;justify-content:space-between}
+.brand{font-size:25px;font-weight:850;letter-spacing:-.5px}
+.header-actions{display:flex;gap:8px}
+.icon-btn{border:0;background:#fff;border-radius:14px;width:44px;height:44px;box-shadow:0 2px 12px #17333d0d}
+main{padding:8px 18px}
+.hero{background:linear-gradient(135deg,#E53935,#168f89);color:white;border-radius:25px;padding:20px;margin-bottom:24px;box-shadow:0 10px 25px #19b6ad2b}
+.hero-top{display:flex;justify-content:space-between;gap:16px}
+.hero-title{font-size:14px;color:#dff8f6;font-weight:700}
+.hero-number{font-size:42px;font-weight:900;line-height:1;margin:6px 0 2px}
+.hero-label{font-size:14px}
+.metrics{display:flex;flex-direction:column;gap:7px;text-align:right;font-size:13px;font-weight:750}
+.section-title{font-size:20px;font-weight:850;margin:0 0 12px}
+.search{display:flex;gap:8px;margin-bottom:18px}
+.search input{flex:1}
+.field{width:100%;padding:13px 14px;border:1px solid var(--border);border-radius:14px;background:var(--card-2);color:var(--text);outline:none}
+.field:focus{border-color:var(--primary)}
+.cards{display:grid;gap:12px}
+.card{background:var(--card);border-radius:19px;padding:14px;display:flex;gap:13px;align-items:center;box-shadow:0 3px 15px #17333d08}
+.poster{width:112px;height:auto;aspect-ratio:16/9;flex:0 0 112px;border-radius:14px;background:#2A1A1B;display:grid;place-items:center;font-size:28px;color:var(--primary);overflow:hidden}.poster img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.card-body{min-width:0;flex:1}
+.title{font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta{font-size:13px;color:var(--muted);margin-top:4px}
+.progress{height:7px;background:#30353C;border-radius:99px;overflow:hidden;margin-top:10px}
+.progress span{display:block;height:100%;background:var(--primary);border-radius:99px}
+.pct{font-size:12px;color:var(--muted);margin-top:5px;display:flex;justify-content:space-between;align-items:center;gap:8px}.card-tracking{font-size:10px;color:var(--muted);text-align:right;white-space:nowrap}.card-tracking strong{color:var(--text)}
+.badge{display:inline-flex;padding:5px 8px;border-radius:999px;font-size:11px;font-weight:800;margin-top:7px;background:#2B3037;color:#C4CBD2}
+.empty{background:var(--card);border-radius:20px;padding:30px;text-align:center;color:var(--muted)}
+.empty strong{display:block;color:var(--text);font-size:18px;margin-bottom:6px}
+.bottom-nav{position:fixed;z-index:20;bottom:0;left:50%;transform:translateX(-50%);width:min(760px,100%);background:#16191ddd;backdrop-filter:blur(14px);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(3,1fr);padding:8px 12px calc(8px + env(safe-area-inset-bottom))}
+.nav-btn{border:0;background:none;color:var(--muted);padding:7px 4px;font-size:11px;font-weight:750}
+.nav-btn.active{color:var(--primary)}
+.nav-icon{font-size:21px;display:block;margin-bottom:2px}
+.primary{background:var(--primary);color:white;border:0;border-radius:14px;padding:13px 17px;font-weight:800}
+.secondary{background:#2B3037 !important;color:#F3F4F6 !important;border:1px solid #4A525C !important;border-radius:14px;padding:12px 16px;font-weight:800}
+.filters{display:flex;gap:8px;overflow:auto;margin:0 0 16px;padding-bottom:2px}
+.list-toolbar{display:flex;gap:9px;align-items:center;margin:0 0 16px}
+.list-toolbar .field{flex:1}
+.sort-label{font-size:11px;color:var(--muted);font-weight:800;white-space:nowrap}
+.chart-card{background:var(--card);border-radius:20px;padding:16px;margin-top:14px;overflow:visible}
+.chart-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#111417;border-radius:12px;padding:4px;margin-bottom:18px}
+.chart-tab{border:0;background:transparent;color:var(--muted);border-radius:9px;padding:9px;font-size:12px;font-weight:850}
+.chart-tab.active{background:#3A2022;color:#FF6B68}
+.bar-chart{height:250px;box-sizing:border-box;display:flex;align-items:flex-end;gap:2px;padding:10px 2px 30px;border-bottom:1px solid var(--border);overflow:visible;position:relative}
+.bar-col{height:100%;flex:1;min-width:8px;display:flex;align-items:flex-end;justify-content:center;position:relative;min-width:0}
+.bar-fill{width:42%;max-width:13px;min-height:2px;background:var(--primary);border-radius:5px 5px 0 0;position:relative;z-index:1}
+.bar-value{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(100% + 4px);font-size:9px;color:var(--text);font-weight:850;white-space:nowrap}
+.bar-label{position:absolute;bottom:-24px;left:50%;transform:translateX(-50%);font-size:8px;color:var(--muted);white-space:nowrap;line-height:1;z-index:2}
+.bar-labels{display:none}
+.chart-empty{padding:35px 12px;text-align:center;color:var(--muted);font-size:13px}
+.chart-total{font-size:12px;color:var(--muted);margin-top:12px;display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:20px}
+.chart-total .chart-total-left{font-weight:700;color:var(--text)}
+.chart-total .chart-total-right{text-align:right;white-space:nowrap}
+.stats .stat.wide{grid-column:span 2}
+.stat-sub{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.25}
+.kpi-date{font-size:17px!important;line-height:1.1}
+
+.filter{white-space:nowrap;border:0;background:#fff;border-radius:999px;padding:9px 13px;color:var(--muted);font-weight:750}
+.filter.active{background:#3A2022;color:#FF6B68}
+.modal{position:fixed;inset:0;background:#000000B8;z-index:50;display:none;align-items:flex-end}
+.modal.show{display:flex}
+.sheet{width:min(760px,100%);margin:auto 0 0;background:var(--card);border-radius:25px 25px 0 0;padding:20px 18px calc(22px + env(safe-area-inset-bottom));max-height:90vh;overflow:auto}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.sheet h2{margin:0;font-size:21px}
+.form-grid{display:grid;gap:12px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{font-size:12px;font-weight:800;color:var(--muted);display:block;margin:0 0 6px}
+.actions{display:flex;gap:9px;margin-top:18px}
+.actions>*{flex:1;min-height:48px}.actions .secondary{background:#2B3037 !important;color:#FFFFFF !important}.actions .primary{background:#E53935 !important;color:#FFFFFF !important}
+.detail-poster{width:100%;aspect-ratio:16/9;height:auto;border-radius:22px;background:#2A1A1B;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:18px}
+.detail-poster img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.detail-poster.placeholder{font-size:72px;color:var(--primary)}
+.detail-content{padding:0 2px}
+.back{border:0;background:none;padding:0;color:var(--muted);font-weight:750;margin-bottom:15px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.stat{background:var(--card);border-radius:17px;padding:15px}
+.stat .n{font-size:25px;font-weight:900}
+.stat .l{font-size:12px;color:var(--muted);font-weight:700}
+.note{font-size:13px;color:var(--muted);line-height:1.5;background:var(--card);border-radius:17px;padding:15px}
+@media(max-width:420px){.cover-preview{width:190px;aspect-ratio:16/9;height:auto;flex:0 0 190px;border-radius:12px;background:#2A1A1B;display:grid;place-items:center;overflow:hidden;color:#E53935;font-size:28px}.cover-upload{gap:10px;padding:11px}.cover-upload-info{font-size:12px}}
+@media(min-width:600px){main{padding-left:24px;padding-right:24px}.row3{grid-template-columns:repeat(3,1fr)}}
+
+/* Dark cinematic theme */
+body{color-scheme:dark}
+::placeholder{color:#747C84}
+select option{background:#191C20;color:#F3F4F6}
+.icon-btn{color:#F3F4F6;background:#2B3037;border:1px solid #414851}
+.detail-poster{background:#2A1A1B}
+.poster{background:#2A1A1B}
+.bottom-nav{color:var(--text)}
+.nav-btn{color:#858D95}
+.nav-btn.active{color:#FF5A57}
+.filter{background:var(--card-2);color:var(--muted)}
+.filter.active{background:#3A2022;color:#FF6B68}
+.note{color:var(--text)}
+.stat .l{color:var(--muted)}
+.meta,.pct{color:var(--muted)}
+
+
+button.secondary:hover,.icon-btn:hover,.filter:hover{background:#343A42}
+button:disabled{opacity:.45;cursor:not-allowed}
+.field{color:#F3F4F6}
+.field option{color:#F3F4F6;background:#191C20}
+input[type="number"]{color-scheme:dark}
+.season-episodes{display:grid;gap:10px}
+.season-episode-row{display:grid;grid-template-columns:110px 1fr;gap:10px;align-items:center}
+.season-label{font-size:13px;font-weight:800;color:#C9CFD5}
+.helper{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.35}
+
+.cover-btn{cursor:pointer;text-align:center}
+#coverFileName{margin-top:6px;color:#AEB6BE}
+.cover-upload{display:flex;gap:14px;align-items:center;padding:14px;background:#20242A;border:1px dashed #4A525C;border-radius:16px}
+.cover-preview{width:190px;aspect-ratio:16/9;height:auto;flex:0 0 190px;border-radius:12px;background:#2A1A1B;display:grid;place-items:center;overflow:hidden;color:#E53935;font-size:28px}
+.cover-preview img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.cover-upload-info{flex:1;min-width:0}
+.cover-upload-info strong{display:block;color:#F3F4F6;margin-bottom:4px}
+.cover-upload-info span{font-size:11px;color:#AEB6BE;line-height:1.35}
+.cover-input{display:none}
+.cover-btn{display:inline-block;margin-top:9px;background:#E53935 !important;color:#fff !important;border-radius:11px;padding:10px 13px;font-size:12px;font-weight:800;cursor:pointer}
+#coverFileName{margin-top:6px;color:#AEB6BE}
+.card .poster img{width:100%;height:100%;object-fit:cover;border-radius:14px}
+.detail-poster img{width:100%;height:100%;object-fit:cover;border-radius:24px}
+
+.cover-preview{position:relative;cursor:grab;touch-action:none;user-select:none;overflow:hidden}
+.cover-preview.dragging{cursor:grabbing}
+.cover-preview img{position:absolute;width:155%;height:155%;max-width:none;max-height:none;left:50%;top:50%;object-fit:cover;transform-origin:center;will-change:transform;pointer-events:none}
+.cover-adjust{margin-top:8px;padding:10px 12px;border-radius:12px;background:#181B1F;border:1px solid #343A42;color:#AEB6BE;font-size:11px;line-height:1.4}
+.cover-adjust strong{color:#F3F4F6}
+.cover-preview.has-image{background:#111}
+.detail-poster img{object-position:50% 50%}
+.poster img{object-position:var(--cover-pos,50% 50%)}
+
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="brand">📺 Minha TV</div>
+  <div class="header-actions">
+    <button class="icon-btn" onclick="openBackup()" aria-label="Backup" title="Backup">💾</button>
+    <button class="icon-btn" onclick="openForm()" aria-label="Adicionar" title="Adicionar produção">＋</button>
+  </div>
+</header>
+<main id="app"></main>
+</div>
+
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="navWatching" onclick="setView('watching')"><span class="nav-icon">▶</span>Assistindo</button>
+  <button class="nav-btn" id="navList" onclick="setView('list')"><span class="nav-icon">▣</span>Minha lista</button>
+  <button class="nav-btn" id="navStats" onclick="setView('stats')"><span class="nav-icon">▥</span>Estatísticas</button>
+</nav>
+
+<div class="modal" id="formModal" onclick="if(event.target===this)closeModal()">
+ <div class="sheet">
+  <div class="sheet-head"><h2 id="formTitle">Nova produção</h2><button class="icon-btn" onclick="closeModal()">✕</button></div>
+  <form id="form" onsubmit="saveProduction(event)"><input type="hidden" id="fId">
+   <div class="form-grid">
+    <div><label>Título</label><input class="field" id="fTitle" required placeholder="Ex.: Vale Tudo"></div>
+    <div>
+      <label>Imagem de capa</label>
+      <div class="cover-upload">
+        <div class="cover-preview" id="coverPreview">📺</div>
+        <div class="cover-upload-info">
+          <strong>Adicionar capa</strong>
+          <span>Escolha uma imagem da galeria do celular.</span>
+          <label class="cover-btn" for="fCover">📷 Escolher capa</label>
+          <input class="cover-input" id="fCover" type="file" accept="image/*" onchange="previewCover(event)">
+          <div id="coverFileName" class="helper">Nenhuma imagem selecionada</div>
+          <div class="cover-adjust"><strong>Capa 16:9:</strong> a imagem será ajustada automaticamente ao formato 16:9, sem necessidade de reposicionamento.</div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div><label>Tipo</label><select class="field" id="fType"><option>Série</option><option>Novela</option></select></div>
+      <div><label>Ano</label><input class="field" id="fYear" type="number" min="1900" max="2100" required placeholder="Ex.: 2026"></div>
+    </div>
+    <div><label>Status</label><select class="field" id="fStatus"><option>Quero assistir</option><option>Assistindo</option><option>Pausada</option><option>Concluída</option><option>Abandonada</option></select></div>
+    <div class="row">
+      <div><label>Quantidade de temporadas</label><input class="field" id="fSeasons" type="number" min="1" value="1" required oninput="updateSeasonFields()"></div>
+      <div><label>Temporada atual</label><input class="field" id="fSeason" type="number" min="1" value="1" required></div>
+    </div>
+    <div><label>Episódio atual</label><input class="field" id="fEpisode" type="number" min="1" value="1" required></div>
+    <div id="singleTotalWrap"><label>Total de episódios</label><input class="field" id="fTotal" type="number" min="1" required placeholder="Ex.: 10"></div>
+    <div id="seasonTotalsWrap" style="display:none">
+      <label>Total de episódios por temporada</label>
+      <div class="season-episodes" id="seasonEpisodeFields"></div>
+      <div class="helper">Informe quantos episódios existem em cada temporada.</div>
+    </div>
+    <div><label>Nota (0 a 5)</label><input class="field" id="fRating" type="number" min="0" max="5" step=".5" value="0"></div>
+    <div><label>Observações</label><textarea class="field" id="fNotes" rows="3" placeholder="Comentários pessoais..."></textarea></div>
+   </div>
+   <div class="actions"><button type="button" class="secondary" onclick="closeModal()">Cancelar</button><button class="primary" id="saveFormButton">Salvar</button></div>
+  </form>
+ </div>
+</div>
+
+<div class="modal" id="backupModal" onclick="if(event.target===this)closeBackup()">
+ <div class="sheet">
+  <div class="sheet-head"><h2>Backup e restauração</h2><button class="icon-btn" onclick="closeBackup()">✕</button></div>
+  <div class="note" style="margin-bottom:14px">
+    Faça uma cópia dos seus dados para guardar em outro local ou transferir para outro celular. O backup inclui <strong>produções, capas e histórico de episódios assistidos</strong>.
+  </div>
+  <div class="actions" style="margin-top:0">
+    <button type="button" class="primary" onclick="exportBackup()">⬇ Exportar backup</button>
+    <button type="button" class="secondary" onclick="document.getElementById('backupFile').click()">⬆ Importar backup</button>
+  </div>
+  <input id="backupFile" type="file" accept="application/json,.json" style="display:none" onchange="importBackup(event)">
+  <div class="helper" style="margin-top:12px">
+    A importação <strong>substitui os dados atuais</strong> pelos dados do arquivo. Antes de importar, recomendamos exportar um backup do estado atual.
+  </div>
+ </div>
+</div>
+
+<script>
+const KEY='minha_tv_v1';
+let productions=JSON.parse(localStorage.getItem(KEY)||'[]');
+let view='watching', filter='Todos', search='';
+let listSort='status';
+let statsPeriod='week';
+const HISTORY_KEY='minha_tv_episode_history_v1';
+let episodeHistory=JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');
+function saveHistory(){localStorage.setItem(HISTORY_KEY,JSON.stringify(episodeHistory));}
+
+
+function openBackup(){
+ document.getElementById('backupFile').value='';
+ document.getElementById('backupModal').classList.add('show');
+}
+function closeBackup(){document.getElementById('backupModal').classList.remove('show');}
+function buildBackup(){
+ return {
+   format:'minha-tv-backup',
+   version:1,
+   appVersion:'22',
+   exportedAt:new Date().toISOString(),
+   productions:productions,
+   episodeHistory:episodeHistory
+ };
+}
+function exportBackup(){
+ try{
+   const data=JSON.stringify(buildBackup(),null,2);
+   const blob=new Blob([data],{type:'application/json;charset=utf-8'});
+   const url=URL.createObjectURL(blob);
+   const a=document.createElement('a');
+   const date=new Date().toISOString().slice(0,10);
+   a.href=url;
+   a.download=`minha-tv-backup-${date}.json`;
+   document.body.appendChild(a);
+   a.click();
+   a.remove();
+   setTimeout(()=>URL.revokeObjectURL(url),1000);
+ }catch(err){
+   console.error(err);
+   alert('Não foi possível exportar o backup.');
+ }
+}
+function validateBackup(data){
+ if(!data || data.format!=='minha-tv-backup' || data.version!==1) return false;
+ if(!Array.isArray(data.productions) || !Array.isArray(data.episodeHistory)) return false;
+ return data.productions.every(p=>p && typeof p==='object' && typeof p.id==='string' && typeof p.title==='string' && typeof p.status==='string');
+}
+function importBackup(event){
+ const file=event.target.files?.[0];
+ if(!file)return;
+ const reader=new FileReader();
+ reader.onload=()=>{
+   try{
+     const data=JSON.parse(reader.result);
+     if(!validateBackup(data)){
+       alert('Este arquivo não parece ser um backup válido do Minha TV.');
+       return;
+     }
+     const when=data.exportedAt?new Date(data.exportedAt):null;
+     const dateText=when && !Number.isNaN(when.getTime()) ? when.toLocaleString('pt-BR') : 'data não informada';
+     const ok=confirm(`Importar este backup?\n\nProduções: ${data.productions.length}\nEpisódios registrados: ${data.episodeHistory.length}\nBackup criado em: ${dateText}\n\nATENÇÃO: os dados atuais serão substituídos.`);
+     if(!ok)return;
+     productions=data.productions;
+     episodeHistory=data.episodeHistory;
+     save();
+     saveHistory();
+     closeBackup();
+     render();
+     alert('Backup importado com sucesso.');
+   }catch(err){
+     console.error(err);
+     alert('Não foi possível ler o arquivo de backup.');
+   }finally{
+     event.target.value='';
+   }
+ };
+ reader.onerror=()=>{event.target.value='';alert('Não foi possível ler o arquivo selecionado.');};
+ reader.readAsText(file);
+}
+
+function save(){localStorage.setItem(KEY,JSON.stringify(productions));}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+function watchedEpisodes(p){
+ if(Array.isArray(p.seasonEpisodes)&&p.seasonEpisodes.length){
+   const before=p.seasonEpisodes.slice(0,Math.max(0,(p.season||1)-1)).reduce((a,b)=>a+(+b||0),0);
+   return before+(+p.episode||0);
+ }
+ return +p.episode||0;
+}
+function pct(p){if(!p.totalEpisodes)return 0;return Math.min(100,Math.round((watchedEpisodes(p)/p.totalEpisodes)*100));}
+function icon(p){return p.type==='Novela'?'🎭':'📺';}
+
+
+
+function getProgramHistory(p){
+ return episodeHistory.filter(h=>h.productionId===p.id).sort((a,b)=>new Date(a.watchedAt)-new Date(b.watchedAt));
+}
+function programDailyAverage(p){
+ const h=getProgramHistory(p);
+ if(!h.length)return 0;
+ const first=new Date(h[0].watchedAt), last=new Date(h[h.length-1].watchedAt);
+ // Use elapsed time between the first and latest recorded episode.
+ // A +1 day was incorrectly making a short interval count as 2 days.
+ const elapsedDays=Math.max(1,(last-first)/86400000);
+ return h.length/elapsedDays;
+}
+function programFinishDate(p){
+ if(p.status!=='Assistindo')return null;
+ const daily=programDailyAverage(p);
+ const remaining=Math.max(0,(+p.totalEpisodes||0)-watchedEpisodes(p));
+ if(!daily||!remaining)return null;
+ const d=new Date(); d.setHours(12,0,0,0);
+ d.setDate(d.getDate()+Math.ceil(remaining/daily));
+ return d;
+}
+function formatDateShort(d){return d?d.toLocaleDateString('pt-BR'):'—';}
+function sortItems(items){
+ const copy=[...items];
+ if(listSort==='alpha') return copy.sort((a,b)=>a.title.localeCompare(b.title,'pt-BR',{sensitivity:'base'}));
+ if(listSort==='recent') return copy.sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+ const order={'Assistindo':0,'Quero assistir':1,'Pausada':2,'Concluída':3,'Abandonada':4};
+ return copy.sort((a,b)=>{
+   const sa=order[a.status]??99,sb=order[b.status]??99;
+   if(sa!==sb)return sa-sb;
+   if(a.status==='Assistindo'&&b.status==='Assistindo'){
+     const ah=getProgramHistory(a),bh=getProgramHistory(b);
+     const ad=ah.length?new Date(ah[ah.length-1].watchedAt).getTime():0;
+     const bd=bh.length?new Date(bh[bh.length-1].watchedAt).getTime():0;
+     if(ad!==bd)return bd-ad;
+   }
+   return a.title.localeCompare(b.title,'pt-BR',{sensitivity:'base'});
+ });
+}
+
+function logWatchedEpisode(p,season,episode){
+ episodeHistory.push({
+   id:Date.now().toString()+Math.random().toString(36).slice(2,7),
+   productionId:p.id,
+   title:p.title,
+   season,
+   episode,
+   watchedAt:new Date().toISOString()
+ });
+ saveHistory();
+}
+
+function summary(){
+ const total=productions.length;
+ const watching=productions.filter(p=>p.status==='Assistindo').length;
+ const completed=productions.filter(p=>p.status==='Concluída').length;
+ const wanted=productions.filter(p=>p.status==='Quero assistir').length;
+ return `<section class="hero"><div class="hero-top"><div><div class="hero-title">MINHA BIBLIOTECA</div><div class="hero-number">${total}</div><div class="hero-label">produções</div></div><div class="metrics"><div>Assistindo&nbsp; ${watching}</div><div>Concluídas&nbsp; ${completed}</div><div>Quero assistir&nbsp; ${wanted}</div></div></div></section>`;
+}
+function card(p){
+ const progress=pct(p);
+ const daily=programDailyAverage(p);
+ const finish=programFinishDate(p);
+ const tracking=p.status==='Assistindo'&&daily>0
+   ? `<span class="card-tracking"><strong>${daily.toFixed(1)}</strong>/dia · termina ${formatDateShort(finish)}</span>` : '';
+ return `<article class="card" onclick="openDetail('${p.id}')">
+  <div class="poster">${p.cover ? `<img src="${p.cover}" alt="Capa de ${esc(p.title)}" loading="lazy">` : icon(p)}</div><div class="card-body">
+   <div class="title">${esc(p.title)}</div>
+   <div class="meta">${esc(p.type)}${p.year?' · '+p.year:''} · T${p.season} · Ep ${p.episode}</div>
+   <div class="progress"><span style="width:${progress}%"></span></div>
+   <div class="pct"><span>${p.totalEpisodes?progress+'%':'Progresso manual'} <span class="badge">${esc(p.status)}</span></span>${tracking}</div>
+  </div><div>›</div>
+ </article>`;
+}
+
+function render(){
+ const app=document.getElementById('app');
+ document.getElementById('navWatching').classList.toggle('active',view==='watching');
+ document.getElementById('navList').classList.toggle('active',view==='list');
+ document.getElementById('navStats').classList.toggle('active',view==='stats');
+ if(view==='stats'){renderStats();return;}
+ let items=productions.filter(p=>view==='watching'?p.status==='Assistindo':true);
+ if(filter!=='Todos')items=items.filter(p=>p.status===filter);
+ if(search)items=items.filter(p=>p.title.toLowerCase().includes(search.toLowerCase()));
+ if(view==='list')items=sortItems(items);
+ const title=view==='watching'?'Continuar assistindo':'Minha lista';
+ app.innerHTML=summary()+`<section>
+  <h2 class="section-title">${title}</h2>
+  <div class="search"><input class="field" placeholder="🔎 Buscar..." value="${esc(search)}" oninput="search=this.value;render()"></div>
+  ${view==='list'?`
+   <div class="filters">${['Todos','Quero assistir','Assistindo','Pausada','Concluída','Abandonada'].map(x=>`<button class="filter ${filter===x?'active':''}" onclick="filter='${x}';render()">${x}</button>`).join('')}</div>
+   <div class="list-toolbar">
+    <span class="sort-label">Ordenar por</span>
+    <select class="field" onchange="listSort=this.value;render()">
+      <option value="status" ${listSort==='status'?'selected':''}>Status</option>
+      <option value="recent" ${listSort==='recent'?'selected':''}>Mais recentes adicionadas</option>
+      <option value="alpha" ${listSort==='alpha'?'selected':''}>Ordem alfabética</option>
+    </select>
+   </div>`:''}
+  <div class="cards">${items.length?items.map(card).join(''):`<div class="empty"><strong>${view==='watching'?'Você não está acompanhando nada agora':'Sua biblioteca está vazia'}</strong><span>${view==='watching'?'Adicione uma série ou novela e ela aparecerá aqui.':'Cadastre sua primeira produção para começar.'}</span><br><br><button class="primary" onclick="openForm()">＋ Adicionar</button></div>`}</div>
+ </section>`;
+}
+function setView(v){view=v;filter='Todos';search='';render();}
+function openForm(){
+ document.getElementById('form').reset();
+ document.getElementById('fId').value='';
+ document.getElementById('formTitle').textContent='Nova produção';
+ document.getElementById('saveFormButton').textContent='Salvar';
+ document.getElementById('fCover').value='';
+ restoreCoverPreview(null);
+ document.getElementById('coverFileName').textContent='Nenhuma imagem selecionada';
+ document.getElementById('fSeasons').value=1;
+ document.getElementById('fSeason').value=1;
+ document.getElementById('fEpisode').value=1;
+ document.getElementById('fTotal').value='';
+ document.getElementById('fRating').value=0;
+ document.getElementById('fYear').value='';
+ updateSeasonFields();
+ document.getElementById('formModal').classList.add('show');
+}
+function closeModal(){document.getElementById('formModal').classList.remove('show');}
+function previewCover(event){
+ const file=event.target.files?.[0];
+ if(!file)return;
+ if(!file.type.startsWith('image/')){
+   alert('Escolha um arquivo de imagem.');
+   event.target.value='';
+   return;
+ }
+ if(file.size>10*1024*1024){
+   alert('A imagem deve ter no máximo 10 MB.');
+   event.target.value='';
+   return;
+ }
+ document.getElementById('coverFileName').textContent='Selecionada: '+file.name;
+ const reader=new FileReader();
+ reader.onload=()=>{
+   const preview=document.getElementById('coverPreview');
+   preview.classList.add('has-image');
+   preview.innerHTML=`<img id="coverPreviewImage" src="${reader.result}" alt="Prévia da capa">`;
+ };
+ reader.readAsDataURL(file);
+}
+
+
+
+function restoreCoverPreview(cover){
+ const preview=document.getElementById('coverPreview');
+ if(cover){preview.classList.add('has-image');preview.innerHTML=`<img src="${cover}" alt="Capa atual">`;}
+ else{preview.classList.remove('has-image');preview.innerHTML='📺';}
+}
+
+function compressCover(file){
+ return new Promise((resolve,reject)=>{
+  if(!file){resolve(null);return;}
+  const reader=new FileReader(); reader.onerror=reject;
+  reader.onload=()=>{
+   const img=new Image(); img.onerror=reject;
+   img.onload=()=>{
+    const targetW=1280,targetH=720,targetRatio=16/9;
+    const sourceRatio=img.width/img.height;
+    let sx=0,sy=0,sw=img.width,sh=img.height;
+    if(sourceRatio>targetRatio){sw=Math.round(img.height*targetRatio);sx=Math.round((img.width-sw)/2);}
+    else if(sourceRatio<targetRatio){sh=Math.round(img.width/targetRatio);sy=Math.round((img.height-sh)/2);}
+    const canvas=document.createElement('canvas'); canvas.width=targetW; canvas.height=targetH;
+    canvas.getContext('2d').drawImage(img,sx,sy,sw,sh,0,0,targetW,targetH);
+    resolve(canvas.toDataURL('image/jpeg',0.84));
+   }; img.src=reader.result;
+  }; reader.readAsDataURL(file);
+ });
+}
+function updateSeasonFields(){
+ const seasons=Math.max(1,+document.getElementById('fSeasons').value||1);
+ const single=document.getElementById('singleTotalWrap');
+ const multi=document.getElementById('seasonTotalsWrap');
+ const container=document.getElementById('seasonEpisodeFields');
+ const seasonNow=document.getElementById('fSeason');
+
+ seasonNow.max=seasons;
+ if(+seasonNow.value>seasons)seasonNow.value=seasons;
+
+ if(seasons===1){
+   single.style.display='block';
+   multi.style.display='none';
+   document.getElementById('fTotal').required=true;
+   container.innerHTML='';
+   return;
+ }
+
+ single.style.display='none';
+ multi.style.display='block';
+ document.getElementById('fTotal').required=false;
+
+ const oldValues={};
+ container.querySelectorAll('input').forEach(el=>oldValues[el.id]=el.value);
+ container.innerHTML=Array.from({length:seasons},(_,i)=>{
+   const n=i+1, id='seasonTotal_'+n;
+   return `<div class="season-episode-row"><div class="season-label">Temporada ${n}</div><input class="field" id="${id}" type="number" min="1" required value="${oldValues[id]||''}" placeholder="Episódios"></div>`;
+ }).join('');
+}
+async function saveProduction(e){
+ e.preventDefault();
+
+ const seasons=Math.max(1,+fSeasons.value||1);
+ let seasonEpisodes=[];
+ let totalEpisodes=0;
+
+ if(seasons===1){
+   totalEpisodes=+fTotal.value||0;
+   if(totalEpisodes<1){alert('Informe o total de episódios.');fTotal.focus();return;}
+   seasonEpisodes=[totalEpisodes];
+ }else{
+   for(let i=1;i<=seasons;i++){
+     const el=document.getElementById('seasonTotal_'+i);
+     const n=+(el?.value||0);
+     if(n<1){alert('Informe o total de episódios da temporada '+i+'.');el?.focus();return;}
+     seasonEpisodes.push(n);
+   }
+   totalEpisodes=seasonEpisodes.reduce((a,b)=>a+b,0);
+ }
+
+ const currentSeason=Math.min(Math.max(1,+fSeason.value||1),seasons);
+ const currentSeasonTotal=seasonEpisodes[currentSeason-1]||0;
+ const currentEpisode=Math.min(Math.max(1,+fEpisode.value||1),currentSeasonTotal);
+
+ const existingId=document.getElementById('fId').value;
+ const existing=existingId ? productions.find(x=>x.id===existingId) : null;
+
+ let cover=existing?.cover||null;
+  const file=document.getElementById('fCover').files?.[0];
+ if(file) cover=await compressCover(file);
+
+ const production={
+   id:existingId || Date.now().toString(),
+   title:fTitle.value.trim(),
+   type:fType.value,
+   year:+fYear.value,
+   cover:cover,
+   status:fStatus.value,
+   seasons:seasons,
+   season:currentSeason,
+   episode:currentEpisode,
+   totalEpisodes:totalEpisodes,
+   seasonEpisodes:seasonEpisodes,
+   rating:+fRating.value||0,
+   notes:fNotes.value.trim(),
+   createdAt:existing?.createdAt || new Date().toISOString(),
+   lastWatchedAt:existing?.lastWatchedAt || null
+ };
+
+ if(existingId){
+   const index=productions.findIndex(x=>x.id===existingId);
+   if(index>=0) productions[index]=production;
+ }else{
+   productions.push(production);
+ }
+
+ save();
+ closeModal();
+ view='list';
+ render();
+}
+function openEditForm(id){
+ const p=productions.find(x=>x.id===id);
+ if(!p)return;
+ document.getElementById('fId').value=p.id;
+ document.getElementById('formTitle').textContent='Editar produção';
+ document.getElementById('saveFormButton').textContent='Salvar alterações';
+ document.getElementById('fTitle').value=p.title||'';
+ document.getElementById('fType').value=p.type||'Série';
+ document.getElementById('fYear').value=p.year||'';
+ document.getElementById('fStatus').value=p.status||'Quero assistir';
+ const seasons=Math.max(1,+(p.seasons||1));
+ document.getElementById('fSeasons').value=seasons;
+ document.getElementById('fSeason').value=Math.min(+(p.season||1),seasons);
+ document.getElementById('fEpisode').value=p.episode||1;
+ document.getElementById('fRating').value=p.rating||0;
+ document.getElementById('fNotes').value=p.notes||'';
+ document.getElementById('fCover').value='';
+ document.getElementById('coverFileName').textContent=p.cover?'Capa atual mantida. Escolha outra para substituir.':'Nenhuma imagem selecionada';
+ restoreCoverPreview(p.cover);
+ updateSeasonFields();
+ if(seasons===1){
+  document.getElementById('fTotal').value=p.totalEpisodes||'';
+ }else{
+  const totals=Array.isArray(p.seasonEpisodes)?p.seasonEpisodes:[];
+  totals.forEach((n,i)=>{const el=document.getElementById('seasonTotal_'+(i+1));if(el)el.value=n;});
+ }
+ document.getElementById('formModal').classList.add('show');
+}
+
+
+function openDetail(id){
+ const p=productions.find(x=>x.id===id);if(!p)return;
+ document.getElementById('app').innerHTML=`<button class="back" onclick="render()">← Voltar</button>
+ <div class="detail-poster${p.cover?'':' placeholder'}" aria-label="Capa da produção">${p.cover?`<img src="${p.cover}" alt="Capa de ${esc(p.title)}">`:icon(p)}</div>
+ <div class="detail-content">
+ <h1 style="margin:0 0 5px;font-size:28px">${esc(p.title)}</h1>
+ <div class="meta">${esc(p.type)}${p.year?' · '+p.year:''} · ${esc(p.status)}${p.rating?' · ⭐ '+p.rating+'/5':''}</div>
+ <div class="card" style="margin-top:18px;display:block">
+  <div style="font-weight:850;font-size:17px">T${p.season} · Episódio ${p.episode}</div>
+  ${p.totalEpisodes?`<div class="progress"><span style="width:${pct(p)}%"></span></div><div class="pct">${pct(p)}% concluído · ${watchedEpisodes(p)} de ${p.totalEpisodes}</div>`:''}
+ </div>
+ <div class="actions"><button class="primary" onclick="nextEpisode('${p.id}')">✓ Marcar episódio como assistido</button></div>
+ <div class="actions"><button class="secondary" onclick="openEditForm('${p.id}')">✎ Editar cadastro</button></div>
+ <div class="actions"><button class="secondary" onclick="changeStatus('${p.id}')">Alterar status</button><button class="secondary" onclick="deleteProduction('${p.id}')">Excluir</button></div>
+ ${p.notes?`<h3 style="margin:24px 0 8px">Observações</h3><div class="note">${esc(p.notes)}</div>`:''}
+ </div>`;
+}
+function nextEpisode(id){
+ const p=productions.find(x=>x.id===id);if(!p)return;
+ const seasonTotals=Array.isArray(p.seasonEpisodes)&&p.seasonEpisodes.length?p.seasonEpisodes:[p.totalEpisodes];
+ const currentSeason=Math.max(1,+p.season||1);
+ const seasonTotal=seasonTotals[currentSeason-1]||p.totalEpisodes||0;
+ const watchedSeason=currentSeason;
+ const watchedEpisode=Math.max(1,+p.episode||1);
+
+ logWatchedEpisode(p,watchedSeason,watchedEpisode);
+ p.lastWatchedAt=new Date().toISOString();
+
+ if(seasonTotal && watchedEpisode>=seasonTotal){
+   if(currentSeason<seasonTotals.length){
+     p.season=currentSeason+1;
+     p.episode=1;
+     p.status='Assistindo';
+   }else{
+     p.episode=watchedEpisode;
+     p.status='Concluída';
+   }
+ }else{
+   p.episode=watchedEpisode+1;
+   p.status='Assistindo';
+ }
+ save();
+ openDetail(id);
+}
+
+function changeStatus(id){
+ const p=productions.find(x=>x.id===id);if(!p)return;
+ const statuses=['Quero assistir','Assistindo','Pausada','Concluída','Abandonada'];
+ const next=prompt('Digite o novo status:\\n'+statuses.join('\\n'),p.status);
+ if(statuses.includes(next)){p.status=next;save();openDetail(id);}
+}
+function deleteProduction(id){
+ if(confirm('Excluir esta produção?')){productions=productions.filter(p=>p.id!==id);save();render();}
+}
+function startOfWeek(d){const x=new Date(d);x.setHours(0,0,0,0);const day=x.getDay();x.setDate(x.getDate()+(day===0?-6:1-day));return x;}
+function monthStart(d){return new Date(d.getFullYear(),d.getMonth(),1);}
+function countHistoryByRange(start,end){return episodeHistory.filter(h=>{const d=new Date(h.watchedAt);return d>=start&&d<end;}).length;}
+function buildEpisodeBuckets(period){
+ const now=new Date(),rows=[];
+ if(period==='week'){
+  const current=startOfWeek(now);
+  for(let i=19;i>=0;i--){const start=new Date(current);start.setDate(start.getDate()-i*7);const end=new Date(start);end.setDate(end.getDate()+7);rows.push({label:`${String(start.getDate()).padStart(2,'0')}/${String(start.getMonth()+1).padStart(2,'0')}`,start,end,count:countHistoryByRange(start,end)});}
+ }else{
+  const current=monthStart(now);
+  for(let i=12;i>=0;i--){const start=new Date(current.getFullYear(),current.getMonth()-i,1);const end=new Date(start.getFullYear(),start.getMonth()+1,1);rows.push({label:start.toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}).replace('.',''),start,end,count:countHistoryByRange(start,end)});}
+ }
+ return rows;
+}
+function episodeChart(period){
+ const rows=buildEpisodeBuckets(period);
+ const max=Math.max(1,...rows.map(r=>r.count));
+ const total=rows.reduce((a,r)=>a+r.count,0);
+ const avg=rows.length?total/rows.length:0;
+ const avgLabel=period==='week'?'Média por semana':'Média por mês';
+ return `<div class="chart-card">
+  <div class="chart-tabs">
+   <button class="chart-tab ${period==='week'?'active':''}" onclick="statsPeriod='week';renderStats()">Semana</button>
+   <button class="chart-tab ${period==='month'?'active':''}" onclick="statsPeriod='month';renderStats()">Mês</button>
+  </div>
+  ${total===0?`<div class="chart-empty">Nenhum episódio foi marcado como assistido neste período.<br><span style="font-size:11px">Os próximos episódios registrados aparecerão aqui.</span></div>`:`
+   <div class="bar-chart">${rows.map(r=>{
+     const h=r.count?Math.max(3,Math.round(r.count/max*100)):0;
+     return `<div class="bar-col"><div class="bar-fill" style="height:${h}%">${r.count?`<span class="bar-value">${r.count}</span>`:''}</div><span class="bar-label">${esc(r.label)}</span></div>`;
+   }).join('')}</div>`}
+  <div class="chart-total">
+   <span class="chart-total-left">${total} episódio${total===1?'':'s'} assistido${total===1?'':'s'} no período</span>
+   <span class="chart-total-right">${avg.toFixed(1)} episódio${avg===1?'':'s'} · ${avgLabel}</span>
+  </div>
+ </div>`;
+}
+
+function getDailyAverage(){
+ if(!episodeHistory.length)return 0;
+ const first=Math.min(...episodeHistory.map(h=>new Date(h.watchedAt).getTime()));
+ const days=Math.max(1,Math.ceil((Date.now()-first)/86400000)+1);
+ return episodeHistory.length/days;
+}
+function getRemainingEpisodes(){return productions.filter(p=>p.status!=='Concluída'&&p.status!=='Abandonada').reduce((sum,p)=>sum+Math.max(0,(+p.totalEpisodes||0)-watchedEpisodes(p)),0);}
+function getEstimatedFinishDate(){const daily=getDailyAverage(),remaining=getRemainingEpisodes();if(!daily||!remaining)return null;const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+Math.ceil(remaining/daily));return d.toLocaleDateString('pt-BR');}
+function renderStats(){
+ const total=productions.length;
+ const completed=productions.filter(p=>p.status==='Concluída').length;
+ const watching=productions.filter(p=>p.status==='Assistindo').length;
+ const avgRating=productions.length?(productions.reduce((a,p)=>a+(+p.rating||0),0)/productions.length).toFixed(1):'0.0';
+ const dailyAvg=getDailyAverage();
+ const remaining=getRemainingEpisodes();
+ const finishDate=getEstimatedFinishDate();
+
+ document.getElementById('app').innerHTML=summary()+`<h2 class="section-title">Estatísticas</h2>
+ <div class="stats">
+  <div class="stat"><div class="n">${total}</div><div class="l">Produções</div></div>
+  <div class="stat"><div class="n">${watching}</div><div class="l">Assistindo</div></div>
+  <div class="stat"><div class="n">${completed}</div><div class="l">Concluídas</div></div>
+  <div class="stat"><div class="n">⭐ ${avgRating}</div><div class="l">Nota média</div></div>
+  <div class="stat"><div class="n">${dailyAvg.toFixed(1)}</div><div class="l">Média de episódios/dia</div></div>
+  <div class="stat"><div class="n kpi-date">${finishDate||'—'}</div><div class="l">Previsão de fim da Minha lista</div><div class="stat-sub">${remaining?`${remaining} episódios restantes`: 'Sem episódios pendentes calculáveis'}</div></div>
+ </div>
+ <h3 style="margin:24px 0 10px">Episódios assistidos</h3>
+ ${episodeChart(statsPeriod)}
+ <h3 style="margin:24px 0 10px">Distribuição por status</h3>
+ <div class="note">${['Quero assistir','Assistindo','Pausada','Concluída','Abandonada'].map(s=>{let n=productions.filter(p=>p.status===s).length;return `<div style="display:flex;justify-content:space-between;padding:7px 0"><b>${s}</b><span>${n}</span></div>`}).join('')}</div>`;
+}
+
+render();
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch(console.error);
+  });
+}
+</script>
+</body>
+</html>
